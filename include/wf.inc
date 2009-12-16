@@ -72,6 +72,7 @@
 %%% Controls %%%
 -define(CONTROL_BASE(Module), ?ELEMENT_BASE(Module), tag).
 -record(inplace_textbox, {?CONTROL_BASE(element_inplace_textbox), text="", html_encode=true, start_mode=view, validators=[]}).
+-record(inplace_textarea, {?CONTROL_BASE(element_inplace_textarea), text="", html_encode=true, start_mode=view, validators=[]}).
 -record(wizard, {?CONTROL_BASE(element_wizard), titles, steps }).
 -record(upload, {?CONTROL_BASE(element_upload), show_button=true, button_text="Upload" }).
 
