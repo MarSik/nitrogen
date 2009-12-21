@@ -56,23 +56,23 @@ ensure_session() ->
 	case wf_platform:get_cookie(wf) of
 			undefined -> 
 				sign_key();
-			Value ->
-				case wf:depickle(Value) of
-					{Pid, Unique} -> 
-						ensure_session_is_alive(Pid, Unique);
-					_ -> 
-						sign_key()
-				end
-		end.
+			Unique when is_list(Unique) ->
+				ensure_session_is_alive(list_to_binary(Unique))
+	end.
 
-ensure_session_is_alive(Pid, Unique) ->
+ensure_session_is_alive(Unique) ->
 	case wf_session_server:get_session(Unique) of
-		{ok, Pid} ->
-			case ping(Pid) of
-				ok ->
-					put(wf_session, Pid),
-					drop_session_cookie(Pid, Unique);
-				timeout ->
+		{ok, Pid} when is_pid(Pid) ->
+			case is_process_alive(Pid) of
+				true ->
+					case ping(Pid) of
+						ok ->
+							put(wf_session, Pid),
+							drop_session_cookie(Pid, Unique);
+						timeout ->
+							sign_key()
+					end;
+				_ ->
 					sign_key()
 			end;
 		_ ->
@@ -80,13 +80,13 @@ ensure_session_is_alive(Pid, Unique) ->
 	end.
 
 sign_key() -> 	
-	Unique = erlang:make_ref(),
+	Unique = uuid:uuid(),
 	{ok, Pid} = wf_session_server:sign_key(Unique),
 	put(wf_session, Pid),
 	drop_session_cookie(Pid, Unique).
 
-drop_session_cookie(Pid, Unique) ->
-	Session = wf:pickle({Pid, Unique}),
+drop_session_cookie(_Pid, Unique) ->
+	Session = Unique,
 	Timeout = nitrogen:get_session_timeout(),
 	wf_platform:set_cookie(wf, Session, "/", Timeout).
 

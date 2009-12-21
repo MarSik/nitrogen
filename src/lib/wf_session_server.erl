@@ -14,8 +14,19 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 		 terminate/2, code_change/3]).
 
+-export([create_table/1]).
+
 -define(SERVER, ?MODULE). 
 
+%% Mnesia session store structures and funcs
+-record(nitrogen_session, {unique, pid}).
+
+create_table(Nodes) ->
+	mnesia:create_table(nitrogen_session,
+		[{ram_copies, Nodes},
+		 {type, set},
+		 {attributes, record_info(fields, nitrogen_session)}
+                ]).
 
 start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
@@ -32,20 +43,35 @@ get_session(Unique) ->
 %%% gen_server callbacks %%%
 
 init([]) ->
+	ok = mnesia:start(),
+	ok = mnesia:wait_for_tables([nitrogen_session],60000),
 	{ok, dict:new()}.
-
 
 handle_call({sign_key, Unique}, _From, Map) ->
 	{ok, Pid} = wf_session_sup:start_session(),
 	ServerPid = self(),
 	spawn_link(fun () -> session_monitor(ServerPid, Pid, Unique) end),
-	{reply, {ok, Pid}, dict:store(Unique, Pid, Map)};
+	SessionRec = #nitrogen_session{unique = Unique, pid = Pid},
+	CommitFunc = fun() -> mnesia:write(SessionRec) end,
+	{atomic, _} = mnesia:transaction(CommitFunc),
+	{reply, {ok, Pid}, Map};
 
 handle_call({get_session, Unique}, _From, Map) ->
-	{reply, dict:find(Unique, Map), Map}.
+	F = fun() ->
+		mnesia:read({nitrogen_session, Unique})
+	    end,
+	Pid = case mnesia:transaction(F) of
+	 {atomic, []} -> undefined;
+         {atomic, [P]} -> P#nitrogen_session.pid
+	end,        
+	{reply, {ok, Pid}, Map}.
 
 handle_cast({remove_session, Unique}, Map) ->
-	{noreply, dict:erase(Unique, Map)};
+	F = fun() ->
+		mnesia:delete({nitrogen_session, Unique})
+	end,
+	{atomic, _} = mnesia:transaction(F),
+	{noreply, Map};
 
 handle_cast(_Msg, State) ->
 	{noreply, State}.
