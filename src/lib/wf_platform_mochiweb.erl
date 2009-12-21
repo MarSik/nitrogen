@@ -63,8 +63,9 @@ parse_post_args() ->
 %%% COOKIES %%%
 	
 get_cookie(Key) ->
-	Req = wf_platform:get_request(), 
-	Req:get_cookie_value(Key).
+	Key1 = wf:to_list(Key),
+	Req = wf_platform:get_request(),
+	Req:get_cookie_value(Key1).
 
 create_cookie(Key, Value, Path, MinutesToLive) ->
 	SecondsToLive = MinutesToLive * 60,
