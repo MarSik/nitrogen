@@ -71,6 +71,7 @@ get_headers() ->
 	Headers = Info#mod.parsed_header,
 	F = fun(Header) -> proplists:get_value(Header, Headers) end,
 	[
+		{x_forwarded_for, F("x-forwarded-for")},
 		{connection, F("connection")},
 		{accept, F("accept")},
 		{host, F("host")},
