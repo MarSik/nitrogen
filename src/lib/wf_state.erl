@@ -13,10 +13,10 @@
 %%% RESTORE STATE %%%
 
 restore_state() ->
-	[DomState] = wf:q(domState),
-	case DomState of 
+	case wf:q(domState) of 
 		undefined -> ignore;
-		_ ->
+		[] -> ignore;
+		[DomState] ->
 			put(wf_state, wf:depickle(DomState))
 	end.
 

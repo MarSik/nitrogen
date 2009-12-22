@@ -84,8 +84,12 @@ path_search([H|T], N, Paths, Pos) ->
 		Path = erlang:element(N, Tuple),
 		(Pos =< length(Path)) andalso (H == lists:nth(Pos, Path)) 
 	end,
-	Paths1 = lists:filter(F, Paths),
-	path_search(T, N, Paths1, Pos + 1).
+	case F of
+	  undefined -> undefined;
+	  _ ->
+	    Paths1 = lists:filter(F, Paths),
+	    path_search(T, N, Paths1, Pos + 1)
+	end.
 
 %%% HEX ENCODE and HEX DECODE
 
