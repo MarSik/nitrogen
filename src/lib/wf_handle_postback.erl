@@ -11,7 +11,17 @@ handle_request(Module) ->
 	wf_state:restore_state(),
 	
 	% Get the event that triggered the postback...
-	[PostbackInfo] = wf:q(postbackInfo),
+        case wf:q(postbackInfo) of
+          [PostbackInfo] -> handle_request_core(Module, PostbackInfo);
+	  _ -> handle_generic_request(Module)
+        end.
+
+handle_generic_request(Module) ->
+        Data = wf_platform:get_request_body(),
+        wf:render(Module:post_event(Data)),
+        wf_platform:build_response().
+
+handle_request_core(Module, PostbackInfo) ->
 	{ObjectID, Tag, EventType, TriggerID, TargetID, Delegate} = wf:depickle(PostbackInfo),
 
 	% Figure out if we should use a delegate.
