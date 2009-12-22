@@ -35,7 +35,7 @@ render(ControlID, Record) ->
 				#span { id=LabelID, class="label", text=Text, html_encode=Record#inplace_textbox.html_encode, actions=[
 					#buttonize { target=ViewPanelID }
 				]},
-				#span { id=MouseOverID, class="instructions", text="Click to edit", actions=#hide{} }
+				#span { id=MouseOverID, class="instructions", text="Klikněte, pokud chcete změnit text.", actions=#hide{} }
 			], actions = [
 				#event { type=click, actions=[
 					#hide { target=ViewPanelID },
@@ -47,8 +47,8 @@ render(ControlID, Record) ->
 			]},
 			#panel { id=EditPanelID, class="edit", body=[
 				#textbox { id=TextBoxID, text=Text, next=OKButtonID },
-				#button { id=OKButtonID, text="OK", actions=OKEvent#event { type=click } },
-				#button { id=CancelButtonID, text="Cancel", actions=CancelEvent#event { type=click } }
+				#button { id=OKButtonID, text="Uložit", actions=OKEvent#event { type=click } },
+				#button { id=CancelButtonID, text="Zrušit", actions=CancelEvent#event { type=click } }
 			]}
 		]
 	},
