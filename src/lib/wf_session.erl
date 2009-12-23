@@ -61,9 +61,10 @@ ensure_session() ->
 	end.
 
 ensure_session_is_alive(Unique) ->
-	case wf_session_server:get_session(Unique) of
+	PidRecord = wf_session_server:get_session(Unique),
+	case PidRecord of
 		{ok, Pid} when is_pid(Pid) ->
-			case is_process_alive(Pid) of
+			case rpc:call(node(Pid), erlang, is_process_alive, [Pid]) of
 				true ->
 					case ping(Pid) of
 						ok ->
