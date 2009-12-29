@@ -9,7 +9,7 @@
 	to_atom/1, 
 	to_binary/1, 
 	to_integer/1,
-	html_encode/1, html_encode/2
+	html_encode/1, html_encode/2, html_encode_whites/1
 ]).
 
 -include ("wf.inc").
@@ -47,17 +47,31 @@ to_integer(L) when is_list(L) -> list_to_integer(L).
 %%% HTML ENCODE %%%
 
 html_encode(L, false) -> wf:to_list(lists:flatten([L]));
-html_encode(L, true) -> html_encode(wf:to_list(lists:flatten([L]))).	
+html_encode(L, true) -> html_encode(wf:to_list(lists:flatten([L])));
+html_encode(L, whites) -> html_encode_whites(wf:to_list(lists:flatten([L]))).	
+
 html_encode([]) -> [];
 html_encode([H|T]) ->
 	case H of
-		%$\s -> "&nbsp;" ++ html_encode(T);
-		$\t -> "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" ++ html_encode(T);
 		$< -> "&lt;" ++ html_encode(T);
 		$> -> "&gt;" ++ html_encode(T);
 		$" -> "&quot;" ++ html_encode(T);
 		$' -> "&#39;" ++ html_encode(T);
 		$& -> "&amp;" ++ html_encode(T);
-		$\n -> "<br>" ++ html_encode(T);
 		_ -> [H|html_encode(T)]
 	end.
+
+html_encode_whites([]) -> [];
+html_encode_whites([H|T]) ->
+	case H of
+		$\s -> "&nbsp;" ++ html_encode_whites(T);
+		$\t -> "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" ++ html_encode_whites(T);
+		$< -> "&lt;" ++ html_encode_whites(T);
+		$> -> "&gt;" ++ html_encode_whites(T);
+		$" -> "&quot;" ++ html_encode_whites(T);
+		$' -> "&#39;" ++ html_encode_whites(T);
+		$& -> "&amp;" ++ html_encode_whites(T);
+		$\n -> "<br>" ++ html_encode_whites(T);
+		_ -> [H|html_encode_whites(T)]
+	end.
+    
