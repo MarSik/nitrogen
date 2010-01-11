@@ -81,7 +81,7 @@ ensure_session_is_alive(Unique) ->
 	end.
 
 sign_key() -> 	
-	Unique = uuid:uuid(),
+	Unique = wf:guid(),
 	{ok, Pid} = wf_session_server:sign_key(Unique),
 	put(wf_session, Pid),
 	drop_session_cookie(Pid, Unique).
