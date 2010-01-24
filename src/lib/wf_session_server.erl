@@ -44,6 +44,7 @@ get_session(Unique) ->
 
 init([]) ->
 	ok = mnesia:start(),
+	create_table([node()]),
 	ok = mnesia:wait_for_tables([nitrogen_session],60000),
 	{ok, dict:new()}.
 
