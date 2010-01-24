@@ -27,6 +27,8 @@ emit_tag(TagName, [[], []], Props) ->
 
 emit_tag(TagName, [], Props) when 
 	TagName =/= 'div', 
+	TagName =/= 'table', 
+	TagName =/= 'a', 
 	TagName =/= 'span',
 	TagName =/= 'label',
 	TagName =/= 'textarea',
