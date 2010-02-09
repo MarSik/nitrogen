@@ -20,14 +20,15 @@ clean_lower(L) -> string:strip(string:to_lower(to_list(L))).
 
 to_list(undefined) -> [];
 to_list(L) when ?IS_STRING(L) -> L;
+to_list(L) when is_integer(L) -> integer_to_list(L);
 to_list(L) when is_list(L) ->
     SubLists = [inner_to_list(X) || X <- L],
     lists:flatten(SubLists);
 to_list(A) -> inner_to_list(A).
+
 inner_to_list(A) when is_atom(A) -> atom_to_list(A);
 inner_to_list(B) when is_binary(B) -> binary_to_list(B);
-inner_to_list(I) when is_integer(I) -> integer_to_list(I);
-inner_to_list(L) when is_list(L) -> L.
+inner_to_list(L) when is_list(L) -> to_list(L).
 
 to_atom(A) when is_atom(A) -> A;
 to_atom(B) when is_binary(B) -> to_atom(binary_to_list(B));
@@ -46,9 +47,9 @@ to_integer(L) when is_list(L) -> list_to_integer(L).
 
 %%% HTML ENCODE %%%
 
-html_encode(L, false) -> wf:to_list(lists:flatten([L]));
-html_encode(L, true) -> html_encode(wf:to_list(lists:flatten([L])));
-html_encode(L, whites) -> html_encode_whites(wf:to_list(lists:flatten([L]))).	
+html_encode(L, false) -> wf:to_list(L);
+html_encode(L, true) -> html_encode(L);
+html_encode(L, whites) -> html_encode_whites(L).	
 
 html_encode([]) -> [];
 html_encode([H|T]) ->
@@ -59,7 +60,9 @@ html_encode([H|T]) ->
 		$' -> "&#39;" ++ html_encode(T);
 		$& -> "&amp;" ++ html_encode(T);
 		_ -> [H|html_encode(T)]
-	end.
+	end;
+html_encode(L) ->
+    html_encode(wf:to_list(L)).
 
 html_encode_whites([]) -> [];
 html_encode_whites([H|T]) ->
@@ -73,5 +76,6 @@ html_encode_whites([H|T]) ->
 		$& -> "&amp;" ++ html_encode_whites(T);
 		$\n -> "<br>" ++ html_encode_whites(T);
 		_ -> [H|html_encode_whites(T)]
-	end.
-    
+	end;
+html_encode_whites(L) ->
+     html_encode_whites(wf:to_list(L)).
