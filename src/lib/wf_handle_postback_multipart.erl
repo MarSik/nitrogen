@@ -16,6 +16,10 @@ handle_request(Module) ->
 	% Get the event that triggered the postback...
 	[PostbackInfo] = wf:q(postbackInfo),
 	{ObjectID, Tag, _EventType, TriggerID, TargetID, Delegate} = wf:depickle(PostbackInfo),
+
+        % Get the form IDs
+        FormID = wf:q(formID),
+        LoadingID = wf:q(loadingID),
 	
 	% Find the delegate...
 	Module1 = case Delegate of 
@@ -28,7 +32,7 @@ handle_request(Module) ->
 	put(current_path, wf_path:to_path(TargetID)),
 
 	% Create the postback...
-	NewTag = {upload, Tag, FileName, LocalFileData},
+	NewTag = {upload, Tag, FileName, LocalFileData, FormID, LoadingID},
 	Postback = action_event:make_postback(NewTag, upload_finished, TriggerID, TargetID, Module1),
 	
 	% Send the response...
