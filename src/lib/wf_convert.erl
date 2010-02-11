@@ -21,14 +21,14 @@ clean_lower(L) -> string:strip(string:to_lower(to_list(L))).
 to_list(undefined) -> [];
 to_list(L) when ?IS_STRING(L) -> L;
 to_list(L) when is_integer(L) -> integer_to_list(L);
+to_list(L) when is_binary(L) -> binary_to_list(L);
+to_list(L) when is_atom(L) -> atom_to_list(L);
 to_list(L) when is_list(L) ->
     SubLists = [inner_to_list(X) || X <- L],
-    lists:flatten(SubLists);
-to_list(A) -> inner_to_list(A).
+    lists:flatten(SubLists).
 
-inner_to_list(A) when is_atom(A) -> atom_to_list(A);
-inner_to_list(B) when is_binary(B) -> binary_to_list(B);
-inner_to_list(L) when is_list(L) -> to_list(L).
+inner_to_list(L) when is_integer(L) -> L;
+inner_to_list(L) -> to_list(L).
 
 to_atom(A) when is_atom(A) -> A;
 to_atom(B) when is_binary(B) -> to_atom(binary_to_list(B));
@@ -47,22 +47,23 @@ to_integer(L) when is_list(L) -> list_to_integer(L).
 
 %%% HTML ENCODE %%%
 
-html_encode(L, false) -> wf:to_list(L);
-html_encode(L, true) -> html_encode(L);
-html_encode(L, whites) -> html_encode_whites(L).	
-
-html_encode([]) -> [];
-html_encode([H|T]) ->
-	case H of
-		$< -> "&lt;" ++ html_encode(T);
-		$> -> "&gt;" ++ html_encode(T);
-		$" -> "&quot;" ++ html_encode(T);
-		$' -> "&#39;" ++ html_encode(T);
-		$& -> "&amp;" ++ html_encode(T);
-		_ -> [H|html_encode(T)]
-	end;
 html_encode(L) ->
-    html_encode(wf:to_list(L)).
+    html_encode_core(wf:to_list(L)).
+
+html_encode(L, false) -> wf:to_list(L);
+html_encode(L, true) -> html_encode_core(wf:to_list(L));
+html_encode(L, whites) -> html_encode_whites(wf:to_list(L)).	
+
+html_encode_core([]) -> [];
+html_encode_core([H|T]) ->
+	case H of
+		$< -> "&lt;" ++ html_encode_core(T);
+		$> -> "&gt;" ++ html_encode_core(T);
+		$" -> "&quot;" ++ html_encode_core(T);
+		$' -> "&#39;" ++ html_encode_core(T);
+		$& -> "&amp;" ++ html_encode_core(T);
+		_ -> [H|html_encode_core(T)]
+	end.
 
 html_encode_whites([]) -> [];
 html_encode_whites([H|T]) ->
@@ -76,6 +77,5 @@ html_encode_whites([H|T]) ->
 		$& -> "&amp;" ++ html_encode_whites(T);
 		$\n -> "<br>" ++ html_encode_whites(T);
 		_ -> [H|html_encode_whites(T)]
-	end;
-html_encode_whites(L) ->
-     html_encode_whites(wf:to_list(L)).
+	end.
+
