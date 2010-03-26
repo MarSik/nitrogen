@@ -11,7 +11,7 @@ reflect() -> record_info(fields, link).
 render(ControlID, Record) -> 
 	case Record#link.postback of
 		undefined -> ok;
-		Postback -> wf:wire(ControlID, #event { type=click, postback=Postback })
+		Postback -> wf:wire(ControlID, #event { type=click, delegate=Record#link.delegate, postback=Postback })
 	end,
 	
 	Content = [

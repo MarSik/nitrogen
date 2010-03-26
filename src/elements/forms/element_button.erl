@@ -11,7 +11,7 @@ reflect() -> record_info(fields, button).
 render(ControlID, Record) -> 
 	case Record#button.postback of
 		undefined -> ok;
-		Postback -> wf:wire(ControlID, #event { type=click, postback=Postback })
+		Postback -> wf:wire(ControlID, #event { type=click, delegate=Record#button.delegate, postback=Postback })
 	end,
 	
 	Value = ["  ", wf:html_encode(Record#button.text, Record#button.html_encode), "  "], 
