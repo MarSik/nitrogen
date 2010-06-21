@@ -48,7 +48,8 @@ init([]) ->
 	ok = mnesia:wait_for_tables([nitrogen_session],60000),
 	{ok, dict:new()}.
 
-handle_call({sign_key, Unique}, _From, Map) ->
+handle_call({sign_key, Unique0}, _From, Map) ->
+        Unique = wf:to_list(Unique0),
 	{ok, Pid} = wf_session_sup:start_session(),
 	ServerPid = self(),
 	spawn_link(fun () -> session_monitor(ServerPid, Pid, Unique) end),
@@ -57,7 +58,8 @@ handle_call({sign_key, Unique}, _From, Map) ->
 	{atomic, _} = mnesia:transaction(CommitFunc),
 	{reply, {ok, Pid}, Map};
 
-handle_call({get_session, Unique}, _From, Map) ->
+handle_call({get_session, Unique0}, _From, Map) ->
+        Unique = wf:to_list(Unique0),
 	F = fun() ->
 		mnesia:read({nitrogen_session, Unique})
 	    end,
@@ -67,7 +69,8 @@ handle_call({get_session, Unique}, _From, Map) ->
 	end,        
 	{reply, {ok, Pid}, Map}.
 
-handle_cast({remove_session, Unique}, Map) ->
+handle_cast({remove_session, Unique0}, Map) ->
+        Unique = wf:to_list(Unique0),
 	F = fun() ->
 		mnesia:delete({nitrogen_session, Unique})
 	end,

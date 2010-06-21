@@ -84,7 +84,7 @@ sign_key() ->
 	Unique = wf:guid(),
 	{ok, Pid} = wf_session_server:sign_key(Unique),
 	put(wf_session, Pid),
-	drop_session_cookie(Pid, Unique).
+        drop_session_cookie(Pid, Unique).
 
 drop_session_cookie(_Pid, Unique) ->
 	Session = Unique,
